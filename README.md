@@ -3,3 +3,4 @@ This is a basic fitness app where you can track different types of works, the du
 
 ## Tech Stack
 Node.js
+SQLite3

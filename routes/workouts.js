@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const db = require("../db/database");
 
 const workouts = [
   {
@@ -18,7 +19,12 @@ const workouts = [
 
 // get is for fetching the data
 router.get("/", (req, res) => {
-    res.json(workouts);
+    db.all("SELECT * FROM workouts", [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({error: err.message});
+        }
+        res.json(rows);
+    });
 });
 
 // post is to post the workout in the list
@@ -38,18 +44,19 @@ router.post("/", (req, res) => {
         });
     }
 
-    const newWorkout = {
-        id: workouts.length + 1,
-        type,
-        duration,
-        calories
-    };
+    const sql = `INSERT INTO workouts (type, duration, calories) VALUES (?, ?, ?)`;
 
-    workouts.push(newWorkout);
+    db.run(sql, [type, duration, calories], function (err) {
+        if (err) {
+            return res.status(500).json({error: err.message});
+        }
 
-    res.status(201).json({
-        message: "workout added",
-        workout: newWorkout
+        res.status(201).json({
+            id: this.lastID,
+            type,
+            duration,
+            calories
+        });
     });
 });
 
