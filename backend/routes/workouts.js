@@ -4,20 +4,7 @@ const db = require("../db/database");
 const authentication = require("../middleware/auth");
 const authenticationToken = require("../middleware/auth");
 
-const workouts = [
-  {
-    id: 1,
-    type: "Running",
-    duration: 30,
-    calories: 250
-  },
-  {
-    id: 2,
-    type: "Cycling",
-    duration: 45,
-    calories: 400
-  }
-];
+const workouts = [];
 
 // get is for fetching the data
 router.get("/", authenticationToken, (req, res) => {
