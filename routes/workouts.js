@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db/database");
+const authentication = require("../middleware/auth");
+const authenticationToken = require("../middleware/auth");
 
 const workouts = [
   {
@@ -18,8 +20,10 @@ const workouts = [
 ];
 
 // get is for fetching the data
-router.get("/", (req, res) => {
-    db.all("SELECT * FROM workouts", [], (err, rows) => {
+router.get("/", authenticationToken, (req, res) => {
+    const userId = req.user.userId;
+
+    db.all("SELECT * FROM workouts WHERE user_id = ?", [userId], (err, rows) => {
         if (err) {
             return res.status(500).json({error: err.message});
         }
@@ -28,12 +32,13 @@ router.get("/", (req, res) => {
 });
 
 // post is to post the workout in the list
-router.post("/", (req, res) => {
-    const {type, duration, calories} = req.body;
+router.post("/", authenticationToken, (req, res) => {
+    const {type, duration, calories, user_id} = req.body;
+    const userId = req.user.userId;
 
-    if (!type || !duration || !calories) {
+    if (!type || !duration || !calories || !user_id) {
         return res.status(400).json({
-            error: "type, duration and calories are required"
+            error: "type, duration, calories and uder id are required"
             
         });
     }
@@ -44,9 +49,9 @@ router.post("/", (req, res) => {
         });
     }
 
-    const sql = `INSERT INTO workouts (type, duration, calories) VALUES (?, ?, ?)`;
+    const sql = `INSERT INTO workouts (type, duration, calories, user_id) VALUES (?, ?, ?, ?)`;
 
-    db.run(sql, [type, duration, calories], function (err) {
+    db.run(sql, [type, duration, calories, user_id], function (err) {
         if (err) {
             return res.status(500).json({error: err.message});
         }
@@ -55,7 +60,8 @@ router.post("/", (req, res) => {
             id: this.lastID,
             type,
             duration,
-            calories
+            calories,
+            user_id
         });
     });
 });
