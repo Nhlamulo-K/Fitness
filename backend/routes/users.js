@@ -4,6 +4,7 @@ const db = require("../db/database");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const UserModel = require("../models/UserModel")
 const JWT_SECRET = process.env.JWT_SECRET;
 
 module.exports = router;
@@ -19,24 +20,17 @@ router.post("/register", async (req, res) => {
             });
         }
 
-        db.get("SELECT * FROM users WHERE email = ?", [email], async (err, row) => {
-            if (err) return res.status(500).json({error: err.message});
-            if (row) return res.status(400).json({error: "Email already registered"});
+        const existingUser = await UserModel.findUserByEmail(email);
+        if (existingUser) {
+            return res.status(400).json({error: "Email already registaered!"});
+        }
 
-            const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const userId = await UserModel.createUser(email, hashedPassword);
 
-            db.run(
-                "INSERT INTO users (email, password) VALUES (?, ?)",
-                [email, hashedPassword],
-                function (err) {
-                    if (err) return res.status(500).json({error: err.message});
-
-                    res.status(201).json({
-                        message: "User registered successfully",
-                        userID: this.lastID
-                    });
-                }
-            );
+        res.status(201).json({
+            message: "User registered succesfully",
+            userId: userId
         });
     } catch (error) {
         res.status(500).json({error: error.message});
@@ -53,18 +47,27 @@ router.post("/login", async (req, res) => {
             });
         }
 
-        db.get("SELECT * FROM users WHERE email = ?", [email], async (err, user) => {
-            if (err) return res.status(500).json({error: err.message});
-            if (!user) return res.status(400).json({error: "Invalid email or password"});
+        const user = await UserModel.findUserByEmail(email);
+        if (!user) {
+            return res.status(400).json({error: "Invalid email"});
+        }
 
-            const valid = await bcrypt.compare(password, user.password);
-            if (!valid) return res.status(400).json({error: "Invalid email or password"});
+        const valid = await bcrypt.compare(password.user.password);
+        if (!valid) {
+            return res.status(400).json({error: "Invalid password"});
+        }
 
-            const token = jwt.sign({userId: user.id}, JWT_SECRET, {expiresIn: "1h"});
-            res.json({message: "Login successful ", token});
-        });
+        const token = jwt.sign(
+            {userId: user.id},
+            JWT_SECRET,
+            {expiresIn: "2h"}
+        );
+
+        res.json({message: "Login successful ", token});
     }
     catch (error) {
         res.status(500).json({error: error.message});
     }
 });
+
+module.exports = router
