@@ -20,13 +20,13 @@ db.run(`
         duration INTEGER NOT NULL,
         calories INTEGER NOT NULL,
         user_id INTEGER NOT NULL,
-        FORIGN KEY (user_id) REFERENCES users(id)
+        FOREIGN KEY (user_id) REFERENCES users(id)
     )
 `);
 
 // reating a table for user info
 db.run(`
-    CREATE TABLE IF NOT EXISTS user (
+    CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
@@ -46,6 +46,6 @@ db.run(`
         user_id INTEGER NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
-`),
+`);
 
 module.exports = db

@@ -115,4 +115,4 @@ router.delete("/:id", authenticationToken, async (req, res) => {
     }
 });
 
-moodule.exports = router;
+module.exports = router;

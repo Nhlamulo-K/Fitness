@@ -5,7 +5,7 @@ const authenticationToken = require("../middleware/auth");
 const WorkoutModel = require("../models/WorkoutModel");
 
 // get is for fetching the data
-router.get("/", authenticationToken, async (req, res) => {
+router.get("/workouts", authenticationToken, async (req, res) => {
     try {
         const userId = req.user.userId;
         const workouts = await WorkoutModel.getWorkoutsByUser(userId);
@@ -17,7 +17,7 @@ router.get("/", authenticationToken, async (req, res) => {
 });
 
 // post is to post the workout in the database
-router.post("/", authenticationToken, async (req, res) => {
+router.post("/workout", authenticationToken, async (req, res) => {
     try {
         const { type, duration, calories } = req.body;
         const userId = req.user.userId;
