@@ -1,10 +1,10 @@
-const { Promise } = require("mongoose");
+const {Promise} = require("mongoose");
 const db = require("../db/database");
 
-const getWorkoutsByUser = (userId) => {
+const getGoalsByUser = (userId) => {
     return new Promise((resolve, reject) => {
         db.all(
-            "SELECT * FROM workouts WHERE user_id = ?",
+            "SELECT * FROM goals WHERE user_id = ?",
             [userId],
             (err, rows) => {
                 if (err) reject(err);
@@ -14,27 +14,27 @@ const getWorkoutsByUser = (userId) => {
     });
 };
 
-const createWorkout = (type, duration, calories, userId) => {
+const createGoal = (type, target, period, start_date, end_date, active = 1, userId) => {
     return new Promise((resolve, reject) => {
         db.run(
-            `INSERT INTO workouts (type, duration, calories, user_id) 
-            VALUES (?, ?, ?, ?)`,
-            [type, duration, calories, userId],
+            `INSERT INTO goals (type, target, period, start_date, end_date, active, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [type, target, period, start_date, end_date, active, userId],
             function (err) {
                 if (err) reject(err);
-                else resolve(this.lastID);
+                else resolve(this.lastID)
             }
         );
     });
 };
 
-const updateWorkout = (id, type, duration, calories, userId) => {
+const updateGoal = (id, type, target, period, start_date, end_date, active, userId) => {
     return new Promise((resolve, reject) => {
         db.run(
-            `UPDATE workouts
-            SET type = ?, duration = ?, calories = ?
+            `UPDATE goals
+            SET type = ?, target = ?, period = ?, start_date = ?, end_date = ?, active = ?
             WHERE id = ? AND user_id = ?`,
-            [type, duration, calories, id, userId],
+            [type, target, period, start_date, end_date, active, id, userId],
             function (err) {
                 if (err) reject(err);
                 else resolve(this.changes);
@@ -43,10 +43,10 @@ const updateWorkout = (id, type, duration, calories, userId) => {
     });
 };
 
-const deleteWorkout = (id, userId) => {
+const deleteGoal = (id, userId) => {
     return new Promise((resolve, reject) => {
         db.run(
-            "DELETE FROM workouts WHERE id = ? AND user_id = ?",
+            "DELETE FROM goals WHERE id = ? AND user_id = ?",
             [id, userId],
             function (err) {
                 if (err) reject(err);
@@ -57,8 +57,8 @@ const deleteWorkout = (id, userId) => {
 };
 
 module.exports = {
-    getWorkoutsByUser,
-    createWorkout,
-    updateWorkout,
-    deleteWorkout
+    getGoalsByUser,
+    createGoal,
+    updateGoal,
+    deleteGoal
 };
